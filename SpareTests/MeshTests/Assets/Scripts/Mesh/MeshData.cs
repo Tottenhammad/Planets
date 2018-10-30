@@ -22,13 +22,14 @@ public class MeshData : MonoBehaviour {
     public Vector3 secondDirection;
     public Vector3 thirdDirection;
 
-
-    public MeshData(int resolution, MeshRenderer meshRenderer, MeshCollider meshCol, MeshFilter meshFilter,  Vector3 upDir)
+    Transform meshOwner;
+    public MeshData(int resolution, MeshRenderer meshRenderer, MeshCollider meshCol, MeshFilter meshFilter,  Vector3 upDir, Transform owner)
     {
         this.resolution = resolution;
         this.meshRenderer = meshRenderer;
         this.meshCol = meshCol;
         this.meshFilter = meshFilter;
+        this.meshOwner = owner;
         mesh = new Mesh();
         vertices = new Vector3[resolution * resolution];
         triangles = new int[(resolution - 1) * (resolution - 1) * 6];
@@ -57,6 +58,25 @@ public class MeshData : MonoBehaviour {
         meshFilter.sharedMesh = mesh;
 
     }
+    public void Generate()
+    {
+        triangleI = 0;
+        for (int i = 0, index = 0; i < resolution; i++)
+        {
+            for (int j = 0; j < resolution; j++, index++)
+            {
+                Vector2 per = new Vector2(j, i) / (resolution - 1);
+                Vector3 positionOnFace = upDirection + (per.x - .5f) * 2 * secondDirection + (per.y - .5f) * 2 * thirdDirection;
+                //Debug.Log(positionOnFace);
+                vertices[index] = positionOnFace;
+                if (i < resolution - 1 && j < resolution - 1)
+                {
+                    AddTriangle(index, index + resolution + 1, index + resolution);
+                    AddTriangle(index, index + 1, index + resolution + 1);
+                }
+            }
+        }
+    }
     public void Normalise()
     {
         for (var i = 0; i < vertices.Length; i++)
@@ -81,28 +101,26 @@ public class MeshData : MonoBehaviour {
             vertices[i] = Vector3.Scale(vertices[i], scaler);
     }
 
-    public void Generate()
-    {
-        triangleI = 0;
-        for (int i = 0, index = 0; i < resolution; i++)
-        {
-            for (int j = 0; j < resolution; j++, index++)
-            {
-                Vector2 per = new Vector2(j, i) / (resolution - 1);
-                Vector3 positionOnFace = upDirection + (per.x - .5f) * 2 * secondDirection + (per.y - .5f) * 2 * thirdDirection;
-                //Debug.Log(positionOnFace);
-                vertices[index] = positionOnFace;
-                if (i < resolution - 1 && j < resolution - 1)
-                {
-                    AddTriangle(index, index + resolution + 1, index + resolution);
-                    AddTriangle(index, index + 1, index + resolution + 1);
-                }
-            }
-        }
-    }
-
     public void SetMaterial(Material material)
     {
         this.mat = material;
+    }
+
+    public void Noise(float strength)
+    {
+        for (var i = 0; i < vertices.Length; i++)
+            vertices[i] = (vertices[i] + Vector3.one) * (PerlinNoise3D(meshOwner.TransformPoint(vertices[i])));
+    }
+
+    float PerlinNoise3D(Vector3 point)
+    {
+        float x = point.x;
+        float y = point.y;
+        float z = point.z;
+        float XY = Mathf.PerlinNoise(x, y) + Mathf.PerlinNoise(y, x);
+        float YZ = Mathf.PerlinNoise(y, z) + Mathf.PerlinNoise(z, y);
+        float XZ = Mathf.PerlinNoise(x, z) + Mathf.PerlinNoise(z, x);
+
+        return (XY + YZ+ XZ) / 6;
     }
 }

@@ -8,8 +8,9 @@ public class Tester : MonoBehaviour {
 
     public int res;
     public Vector3 scale = Vector3.one;
+    public float noiseStrength;
 	void Start () {
-        meshData = new MeshData(25, GetComponent<MeshRenderer>(), GetComponent<MeshCollider>(), GetComponent<MeshFilter>(), transform.up);
+        meshData = new MeshData(25, GetComponent<MeshRenderer>(), GetComponent<MeshCollider>(), GetComponent<MeshFilter>(), transform.up, transform);
         meshData.Generate();
         meshData.SetMaterial(new Material(Shader.Find("Standard")));
         meshData.RefreshMesh();
@@ -18,9 +19,11 @@ public class Tester : MonoBehaviour {
 
     private void OnValidate()
     {
-        meshData = new MeshData(res, GetComponent<MeshRenderer>(), GetComponent<MeshCollider>(), GetComponent<MeshFilter>(), transform.up);
+        meshData = new MeshData(res, GetComponent<MeshRenderer>(), GetComponent<MeshCollider>(), GetComponent<MeshFilter>(), transform.up, transform);
         meshData.Generate();
+        meshData.SetMaterial(new Material(Shader.Find("Standard")));
         meshData.Scale(scale);
+        meshData.Noise(noiseStrength);
         meshData.RefreshMesh();
     }
 
