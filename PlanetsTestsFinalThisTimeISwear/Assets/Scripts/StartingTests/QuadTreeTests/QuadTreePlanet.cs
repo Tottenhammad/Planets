@@ -31,12 +31,12 @@ public class QuadTreePlanet : MonoBehaviour {
         float modifier = ((resolution - 1) * radius) / 2;
         gameObject.transform.position = storedPos;
         meshes = new QuadTree[] {
-            new QuadTree(gameObject, new GameObject(), resolution, radius, transform.up, 1, maxLod, Vector3.zero, Vector3.zero, noiseSettings, distanceToSplit, mat),
-            new QuadTree(gameObject, new GameObject(), resolution, radius, -transform.up, 1, maxLod, Vector3.zero, Vector3.zero, noiseSettings, distanceToSplit, mat),
-            new QuadTree(gameObject, new GameObject(), resolution, radius, -transform.right, 1, maxLod, Vector3.zero, Vector3.zero, noiseSettings,distanceToSplit, mat),
-            new QuadTree(gameObject, new GameObject(), resolution, radius, transform.right, 1, maxLod, Vector3.zero, Vector3.zero, noiseSettings, distanceToSplit, mat),
-            new QuadTree(gameObject, new GameObject(), resolution, radius, transform.forward, 1, maxLod, Vector3.zero, Vector3.zero, noiseSettings, distanceToSplit, mat),
-            new QuadTree(gameObject, new GameObject(), resolution, radius, -transform.forward, 1, maxLod, Vector3.zero, Vector3.zero, noiseSettings, distanceToSplit, mat),
+            new QuadTree(gameObject, new GameObject(), resolution, radius, transform.up, 1, maxLod, Vector3.zero, Vector3.zero, noiseSettings, distanceToSplit/2, mat),
+            new QuadTree(gameObject, new GameObject(), resolution, radius, -transform.up, 1, maxLod, Vector3.zero, Vector3.zero, noiseSettings, distanceToSplit/2, mat),
+            new QuadTree(gameObject, new GameObject(), resolution, radius, -transform.right, 1, maxLod, Vector3.zero, Vector3.zero, noiseSettings,distanceToSplit/2, mat),
+            new QuadTree(gameObject, new GameObject(), resolution, radius, transform.right, 1, maxLod, Vector3.zero, Vector3.zero, noiseSettings, distanceToSplit/2, mat),
+            new QuadTree(gameObject, new GameObject(), resolution, radius, transform.forward, 1, maxLod, Vector3.zero, Vector3.zero, noiseSettings, distanceToSplit/2, mat),
+            new QuadTree(gameObject, new GameObject(), resolution, radius, -transform.forward, 1, maxLod, Vector3.zero, Vector3.zero, noiseSettings, distanceToSplit/2, mat),
         };
         foreach (QuadTree tree in meshes)
             tree.thisSide.go.transform.position = storedPos;

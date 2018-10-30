@@ -85,7 +85,7 @@ public class TerrarinSide {
         if (useNoise)
         {
             //meshData.Tests();
-            size += meshData.PerlinNoise3D(go.transform, radius,scaler.x, 3, 1.3f, 0.1f,  0.05f);
+            size += meshData.PerlinNoise3D(go.transform, radius,scaler.x, 3, 3.5f, 0.1f,  0.05f);
            // meshData.PositionBasedNoise(go.transform, 0.65f * Vector3.one);
         }
 
