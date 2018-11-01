@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MeshData : MonoBehaviour {
+public class MeshData {
 
 
     public Vector3[] vertices;
