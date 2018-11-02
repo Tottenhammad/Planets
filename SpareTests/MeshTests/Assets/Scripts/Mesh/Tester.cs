@@ -23,7 +23,7 @@ public class Tester : MonoBehaviour {
         meshData.Generate();
         meshData.SetMaterial(new Material(Shader.Find("Standard")));
         meshData.Scale(scale);
-        meshData.Noise(noiseStrength);
+      //  meshData.Noise(noiseStrength);
         meshData.RefreshMesh();
     }
 

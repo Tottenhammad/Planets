@@ -106,21 +106,4 @@ public class MeshData {
         this.mat = material;
     }
 
-    public void Noise(float strength)
-    {
-        for (var i = 0; i < vertices.Length; i++)
-            vertices[i] = (vertices[i] + Vector3.one) * (PerlinNoise3D(meshOwner.TransformPoint(vertices[i])));
-    }
-
-    float PerlinNoise3D(Vector3 point)
-    {
-        float x = point.x;
-        float y = point.y;
-        float z = point.z;
-        float XY = Mathf.PerlinNoise(x, y) + Mathf.PerlinNoise(y, x);
-        float YZ = Mathf.PerlinNoise(y, z) + Mathf.PerlinNoise(z, y);
-        float XZ = Mathf.PerlinNoise(x, z) + Mathf.PerlinNoise(z, x);
-
-        return (XY + YZ+ XZ) / 6;
-    }
 }

@@ -82,11 +82,17 @@ public class Segment : MonoBehaviour {
         if (check)
             meshData.meshCol.enabled = false;
 
-        if (dist < planet.distanceToSplit && lodLevel != planet.maxLod)
+        
+        if ((dist < planet.distanceToSplit && lodLevel != planet.maxLod))
         {
-            Split();
+            StartCoroutine(Split(true));
+            if (children != null)
+                foreach (Segment c in children)
+                    if (c.active)
+                        c.CheckLod();
         }
        else {
+
             if (lodLevel > 1 && dist > 100 * planet.distanceToSplit)
             {
                 Hide();
@@ -108,20 +114,25 @@ public class Segment : MonoBehaviour {
                 }
             }
         }
-        if (children != null)
-            foreach (Segment c in children)
-                if (c.active)
+        if (dist < planet.preLoadDistance && lodLevel != planet.maxLod && dist > planet.distanceToSplit)
+        {
+            StartCoroutine(Split(false));
+            if (children != null)
+                foreach (Segment c in children)
                     c.CheckLod();
+        }
+
     }
 
 
 
 
-    public void Split()
+    IEnumerator Split(bool display)
     {
         if (children == null)
         {
             children = new Segment[4];
+
 
             Vector3[] offsets = new Vector3[] {
                     meshData.upDirection + meshData.secondDirection + meshData.thirdDirection + offset * 2,
@@ -132,6 +143,7 @@ public class Segment : MonoBehaviour {
             int count = 0;
             foreach (Vector3 off in offsets)
             {
+                yield return new WaitForSecondsRealtime(0.000000000000085f);
                 GameObject go = new GameObject(name + ": " + meshData.upDirection);
                 go.transform.parent = transform;
                 Segment s = go.AddComponent<Segment>();
@@ -142,10 +154,18 @@ public class Segment : MonoBehaviour {
         }
         else
         {
-            foreach (Segment child in children)
-                child.Show();
+            if (display)
+            {
+                foreach (Segment child in children)
+                {
+
+                    child.Show();
+                }
+            }
         }
-        Hide();
+        if (display) 
+            Hide();
+
     }
 
 
@@ -162,5 +182,13 @@ public class Segment : MonoBehaviour {
         meshData.meshRenderer.enabled = false;
         meshData.meshCol.enabled = false;
         active = false;
+    }
+
+    public void Delete(bool killChildren)
+    {
+        if (children != null && killChildren)
+            foreach (Segment child in children)
+                child.Delete(true);
+        Destroy(transform);
     }
 }
