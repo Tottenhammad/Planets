@@ -82,7 +82,7 @@ public class Segment : MonoBehaviour {
         if (check)
             meshData.meshCol.enabled = false;
 
-        
+
         if ((dist < planet.distanceToSplit && lodLevel != planet.maxLod))
         {
             StartCoroutine(Split(true));
@@ -119,11 +119,12 @@ public class Segment : MonoBehaviour {
             StartCoroutine(Split(false));
             if (children != null)
                 foreach (Segment c in children)
+                {
                     c.CheckLod();
+                }
         }
 
     }
-
 
 
 
@@ -143,7 +144,7 @@ public class Segment : MonoBehaviour {
             int count = 0;
             foreach (Vector3 off in offsets)
             {
-                yield return new WaitForSecondsRealtime(0.000000000000085f);
+                yield return new WaitForSeconds(0.000000000000085f);
                 GameObject go = new GameObject(name + ": " + meshData.upDirection);
                 go.transform.parent = transform;
                 Segment s = go.AddComponent<Segment>();
