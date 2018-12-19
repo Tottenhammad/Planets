@@ -1,8 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+public enum Place { TOPLEFT, BOTTOMLEFT, TOPRIGHT, BOTTOMRIGHT, PLANE}
+public class QuadTreePlanet : MonoBehaviour
+{
+    public Place[] test = new Place[] {Place.TOPLEFT, Place.TOPRIGHT, Place.BOTTOMLEFT, Place.BOTTOMRIGHT, Place.PLANE};
 
-public class QuadTreePlanet : MonoBehaviour {
     public Segment[] segments;
     [Range(0, 255)]
     public int resolution = 25;
@@ -13,15 +16,37 @@ public class QuadTreePlanet : MonoBehaviour {
     public bool preLoad = true;
     public int preLoadDistance;
     public int maxLod = 10;
+    public int preMaxLod = 3;
+
 
     public string Name = "Planet: ";
 
+    public Place fireSplit;
 
     private void Start()
     {
         Create();
+        StartCoroutine(loop());
+
     }
 
+    IEnumerator loop()
+    {
+        while (true)
+        {
+            yield return new WaitForSecondsRealtime(0.1f);
+            fireSplit = Place.PLANE;
+            yield return new WaitForSecondsRealtime(0.1f);
+            fireSplit = Place.TOPLEFT;
+            yield return new WaitForSecondsRealtime(0.1f);
+            fireSplit = Place.BOTTOMLEFT;
+            yield return new WaitForSecondsRealtime(0.1f);
+            fireSplit = Place.TOPRIGHT;
+            yield return new WaitForSecondsRealtime(0.1f);
+            fireSplit = Place.BOTTOMRIGHT;
+
+        }
+    }
 
     public void Create()
     {
@@ -53,13 +78,13 @@ public class QuadTreePlanet : MonoBehaviour {
             -transform.forward
         };
         int count = 0;
-        foreach(Vector3 vect in vectors)
+        foreach (Vector3 vect in vectors)
         {
             GameObject go = new GameObject(Name + ": " + vect);
             go.transform.parent = transform;
             go.transform.position = transform.position;
             Segment s = go.AddComponent<Segment>();
-            s.MakeSegment(this, resolution, radius, vect, 1, Vector3.zero);
+            s.MakeSegment(this, resolution, radius, vect, 1, Vector3.zero, Place.PLANE);
             segments[count] = s;
             count++;
         }
@@ -70,5 +95,16 @@ public class QuadTreePlanet : MonoBehaviour {
     {
         foreach (Segment s in segments)
             s.CheckLod();
+    }
+
+
+
+    IEnumerator Checker()
+    {
+        foreach (Segment s in segments)
+        {
+            yield return new WaitForSeconds(0.1f);
+            s.CheckLod();
+        }
     }
 }

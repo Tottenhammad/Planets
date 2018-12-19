@@ -21,6 +21,10 @@ public class Segment : MonoBehaviour {
 
     public Segment[] children;
 
+    public Place place;
+
+    bool splitting = false;
+
     public Segment(QuadTreePlanet planet, int resolution, float radius, Vector3 upDir)
     {
         // Creates a new instance of the meshData ready for molding
@@ -31,7 +35,7 @@ public class Segment : MonoBehaviour {
 
         this.planet = planet;
     }
-    public void MakeSegment(QuadTreePlanet planet, int resolution, float radius, Vector3 upDir, int lod, Vector3 offset)
+    public void MakeSegment(QuadTreePlanet planet, int resolution, float radius, Vector3 upDir, int lod, Vector3 offset, Place place)
     {
         // Creates a new instance of the meshData ready for molding
         meshData = new MeshData(resolution, GetComponent<MeshRenderer>(), GetComponent<MeshCollider>(), GetComponent<MeshFilter>(), upDir, transform);
@@ -41,8 +45,10 @@ public class Segment : MonoBehaviour {
         
         meshData.Offset(offset);
         meshData.Normalise();
+        //Refenrce to know its plcase for prelaoding
+        this.place = place;
+
         // Scakes the mesh to be size of radius
-        Debug.Log(lod);
         if (lod > 1)
         {
             meshData.Scale(Vector3.one * (radius / Mathf.Pow(2, lod)));
@@ -83,23 +89,31 @@ public class Segment : MonoBehaviour {
             meshData.meshCol.enabled = false;
 
 
-        if ((dist < planet.distanceToSplit && lodLevel != planet.maxLod))
+        if ((dist < planet.distanceToSplit && lodLevel != planet.maxLod) )
         {
             StartCoroutine(Split(true));
+
+        }
+        /*else if (dist < planet.preLoadDistance && lodLevel != planet.preMaxLod && dist > planet.distanceToSplit && planet.preLoad && lodLevel < planet.maxLod)
+        {
+            StartCoroutine(Split(false));
             if (children != null)
                 foreach (Segment c in children)
-                    if (c.active)
+                {
+                    if (c != null)
                         c.CheckLod();
-        }
-       else {
 
-            if (lodLevel > 1 && dist > 100 * planet.distanceToSplit)
+                }
+
+        }*/
+        else {
+
+            if (lodLevel > 1 && dist > planet.distanceToSplit)
             {
                 Hide();
                 if (children != null)
                 {
-                    foreach (Segment c in children)
-                        c.Hide();
+                    StartCoroutine(HideChildren());
                     //Debug.Log("In");
                 }
             }
@@ -108,30 +122,34 @@ public class Segment : MonoBehaviour {
                 Show();
                 if (children != null)
                 {
-                    foreach (Segment child in children)
-                        child.Hide();
+                    StartCoroutine(HideChildren());
                     //Debug.Log("In");
                 }
             }
         }
-        if (dist < planet.preLoadDistance && lodLevel != planet.maxLod && dist > planet.distanceToSplit)
-        {
-            StartCoroutine(Split(false));
-            if (children != null)
-                foreach (Segment c in children)
-                {
-                    c.CheckLod();
-                }
-        }
 
+        
     }
 
-
+    IEnumerator HideChildren()
+    {
+        foreach (Segment child in children)
+        {
+            yield return new WaitForEndOfFrame();
+            if(child != null)
+                child.Hide();
+        }
+    }
 
     IEnumerator Split(bool display)
     {
+        if (splitting)
+            yield break;
+        else
+            splitting = true;
         if (children == null)
         {
+
             children = new Segment[4];
 
 
@@ -142,13 +160,14 @@ public class Segment : MonoBehaviour {
                     meshData.upDirection - meshData.secondDirection + meshData.thirdDirection + offset * 2
                 };
             int count = 0;
+
             foreach (Vector3 off in offsets)
             {
-                yield return new WaitForSeconds(0.000000000000085f);
+                yield return new WaitUntil(() => planet.fireSplit == Place.BOTTOMRIGHT);
                 GameObject go = new GameObject(name + ": " + meshData.upDirection);
                 go.transform.parent = transform;
                 Segment s = go.AddComponent<Segment>();
-                s.MakeSegment(planet, resolution, radius, meshData.upDirection, lodLevel + 1, off);
+                s.MakeSegment(planet, resolution, radius, meshData.upDirection, lodLevel + 1, off, planet.test[count]);
                 children[count] = s;
                 count++;
             }
@@ -159,14 +178,18 @@ public class Segment : MonoBehaviour {
             {
                 foreach (Segment child in children)
                 {
-
-                    child.Show();
+                    if(child != null)
+                        child.Show();
                 }
             }
         }
         if (display) 
             Hide();
-
+        if (children != null)
+            foreach (Segment c in children)
+                if (c)
+                    c.CheckLod();
+        splitting = false;
     }
 
 

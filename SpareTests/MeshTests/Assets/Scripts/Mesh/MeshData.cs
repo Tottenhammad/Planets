@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class MeshData {
 
@@ -77,6 +78,7 @@ public class MeshData {
             }
         }
     }
+
     public void Normalise()
     {
         for (var i = 0; i < vertices.Length; i++)
