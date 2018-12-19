@@ -7,6 +7,7 @@ public class MeshData {
 
 
     public Vector3[] vertices;
+    public Vector3[] baseVerts;
     public int[] triangles;
 
 
@@ -24,7 +25,8 @@ public class MeshData {
     public Vector3 thirdDirection;
 
     Transform meshOwner;
-    public MeshData(int resolution, MeshRenderer meshRenderer, MeshCollider meshCol, MeshFilter meshFilter,  Vector3 upDir, Transform owner)
+    Filter noiseFilter;
+    public MeshData(int resolution, MeshRenderer meshRenderer, MeshCollider meshCol, MeshFilter meshFilter,  Vector3 upDir, Transform owner, NoiseSettings nS)
     {
         this.resolution = resolution;
         this.meshRenderer = meshRenderer;
@@ -37,6 +39,8 @@ public class MeshData {
         upDirection = upDir;
         secondDirection = new Vector3(upDirection.y, upDirection.z, upDirection.x);
         thirdDirection = Vector3.Cross(upDirection, secondDirection);
+        noiseFilter = new Filter(nS);
+
     }
 
     public void AddTriangle(int a, int b, int c)
@@ -77,6 +81,8 @@ public class MeshData {
                 }
             }
         }
+
+        baseVerts = vertices;
     }
 
     public void Normalise()
@@ -108,4 +114,12 @@ public class MeshData {
         this.mat = material;
     }
 
+    public void Noise()
+    {
+        for (var i = 0; i < vertices.Length; i++)
+        {
+            float elevation = noiseFilter.Eval(baseVerts[i]);
+            vertices[i] = baseVerts[i] * (1+elevation);
+        }
+    }
 }

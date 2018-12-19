@@ -18,6 +18,9 @@ public class QuadTreePlanet : MonoBehaviour
     public int maxLod = 10;
     public int preMaxLod = 3;
 
+    public NoiseSettings noiseSettings;
+
+
 
     public string Name = "Planet: ";
 
@@ -27,7 +30,6 @@ public class QuadTreePlanet : MonoBehaviour
     {
         Create();
         StartCoroutine(loop());
-
     }
 
     IEnumerator loop()

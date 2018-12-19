@@ -17,7 +17,7 @@ public class Segment : MonoBehaviour {
     public Vector3 offset;
 
     // What planet it belongs to
-    private QuadTreePlanet planet;
+    public QuadTreePlanet planet;
 
     public Segment[] children;
 
@@ -28,7 +28,7 @@ public class Segment : MonoBehaviour {
     public Segment(QuadTreePlanet planet, int resolution, float radius, Vector3 upDir)
     {
         // Creates a new instance of the meshData ready for molding
-        meshData = new MeshData(resolution, GetComponent<MeshRenderer>(), GetComponent<MeshCollider>(), GetComponent<MeshFilter>(), upDir, transform);
+        meshData = new MeshData(resolution, GetComponent<MeshRenderer>(), GetComponent<MeshCollider>(), GetComponent<MeshFilter>(), upDir, transform, planet.noiseSettings);
 
         this.radius = radius;
         this.resolution = resolution;
@@ -38,25 +38,26 @@ public class Segment : MonoBehaviour {
     public void MakeSegment(QuadTreePlanet planet, int resolution, float radius, Vector3 upDir, int lod, Vector3 offset, Place place)
     {
         // Creates a new instance of the meshData ready for molding
-        meshData = new MeshData(resolution, GetComponent<MeshRenderer>(), GetComponent<MeshCollider>(), GetComponent<MeshFilter>(), upDir, transform);
+        meshData = new MeshData(resolution, GetComponent<MeshRenderer>(), GetComponent<MeshCollider>(), GetComponent<MeshFilter>(), upDir, transform, planet.noiseSettings);
         // Generates Mesh
         meshData.Generate();
         // Offset Mesh To Right Position
-        
+
         meshData.Offset(offset);
         meshData.Normalise();
         //Refenrce to know its plcase for prelaoding
         this.place = place;
 
         // Scakes the mesh to be size of radius
+        meshData.Noise();
         if (lod > 1)
         {
             meshData.Scale(Vector3.one * (radius / Mathf.Pow(2, lod)));
             meshData.Scale(Vector3.one * Mathf.Pow(2, lod));
         }
         else
-            meshData.Scale(Vector3.one * radius);        
-        
+            meshData.Scale(Vector3.one * radius);
+
 
 
         //Temp Material
