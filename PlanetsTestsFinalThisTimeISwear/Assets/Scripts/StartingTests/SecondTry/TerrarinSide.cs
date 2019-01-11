@@ -119,7 +119,7 @@ public class TerrarinSide {
 
         meshData.SetMaterial(mat2);
         meshData.RefreshMesh();
-
+            
         meshFilter.sharedMesh = meshData.mesh;
     }
 

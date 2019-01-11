@@ -68,9 +68,16 @@ public class QuadTreePlanet : MonoBehaviour {
         {
             refresh = false;
             Create();
-        }   
-        foreach (QuadTree tree in meshes)
-            tree.CheckLod();
+        }
+        try
+        {
+            foreach (QuadTree tree in meshes)
+                tree.CheckLod();
+        }
+        catch
+        {
+            Debug.Log("Caught");
+        }
     }
 
     public Color EvalColor(float timeStamp)

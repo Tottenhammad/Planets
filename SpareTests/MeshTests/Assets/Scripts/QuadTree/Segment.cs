@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 [RequireComponent(typeof(MeshRenderer)), RequireComponent(typeof(MeshCollider)), RequireComponent(typeof(MeshFilter))]
-public class Segment : MonoBehaviour {
+public class Segment : MonoBehaviour
+{
 
     // Contains all info and commands for the mesh control
     public MeshData meshData;
@@ -23,8 +24,8 @@ public class Segment : MonoBehaviour {
 
     public Place place;
 
-    bool splitting = false;
-
+    public bool splitting = false;
+    Vector3 upDir;
     public Segment(QuadTreePlanet planet, int resolution, float radius, Vector3 upDir)
     {
         // Creates a new instance of the meshData ready for molding
@@ -60,12 +61,14 @@ public class Segment : MonoBehaviour {
 
 
 
+        this.upDir = upDir;
+
         //Temp Material
         meshData.SetMaterial(new Material(Shader.Find("Standard")));
         // Recalculate normals, set meshFilter/renderer etc...
         meshData.RefreshMesh();
 
-
+        //meshData.SaveMesh();
         // Set this segments local variables 
         this.radius = radius;
         this.resolution = resolution;
@@ -90,7 +93,7 @@ public class Segment : MonoBehaviour {
             meshData.meshCol.enabled = false;
 
 
-        if ((dist < planet.distanceToSplit && lodLevel != planet.maxLod) )
+        if ((dist < planet.distanceToSplit && lodLevel != planet.maxLod))
         {
             StartCoroutine(Split(true));
 
@@ -107,7 +110,8 @@ public class Segment : MonoBehaviour {
                 }
 
         }*/
-        else {
+        else
+        {
 
             if (lodLevel > 1 && dist > planet.distanceToSplit)
             {
@@ -129,15 +133,20 @@ public class Segment : MonoBehaviour {
             }
         }
 
-        
+
     }
 
+
+    public void CallSplit(bool display = false)
+    {
+        StartCoroutine(Split(display));
+    }
     IEnumerator HideChildren()
     {
         foreach (Segment child in children)
         {
             yield return new WaitForEndOfFrame();
-            if(child != null)
+            if (child != null)
                 child.Hide();
         }
     }
@@ -179,12 +188,12 @@ public class Segment : MonoBehaviour {
             {
                 foreach (Segment child in children)
                 {
-                    if(child != null)
+                    if (child != null)
                         child.Show();
                 }
             }
         }
-        if (display) 
+        if (display)
             Hide();
         if (children != null)
             foreach (Segment c in children)
@@ -194,6 +203,14 @@ public class Segment : MonoBehaviour {
     }
 
 
+    public void QueueChildrenForSplit()
+    {
+        if (lodLevel != planet.preMaxLod - 1)
+        {
+            foreach (Segment c in children)
+                Camera.main.GetComponent<SplitController>().NextLoop.Add(c);
+        }
+    }
 
     public void Show()
     {
@@ -209,11 +226,43 @@ public class Segment : MonoBehaviour {
         active = false;
     }
 
-    public void Delete(bool killChildren)
+    public void Delete(bool killChildren, int lodToKIll = 2)
     {
         if (children != null && killChildren)
             foreach (Segment child in children)
                 child.Delete(true);
-        Destroy(transform);
+        if(lodLevel >= lodToKIll)
+            Destroy(transform.gameObject);
+    }
+
+    public void ResetSegment()
+    {
+        // Creates a new instance of the meshData ready for molding
+        meshData = new MeshData(resolution, GetComponent<MeshRenderer>(), GetComponent<MeshCollider>(), GetComponent<MeshFilter>(), upDir, transform, planet.noiseSettings);
+        // Generates Mesh
+        meshData.Generate();
+        // Offset Mesh To Right Position
+
+        meshData.Offset(offset);
+        meshData.Normalise();
+        //Refenrce to know its plcase for prelaoding
+        this.place = place;
+
+        // Scakes the mesh to be size of radius
+        meshData.Noise();
+        if (lodLevel > 1)
+        {
+            meshData.Scale(Vector3.one * (radius / Mathf.Pow(2, lodLevel)));
+            meshData.Scale(Vector3.one * Mathf.Pow(2, lodLevel));
+        }
+        else
+            meshData.Scale(Vector3.one * radius);
+
+
+
+        //Temp Material
+        meshData.SetMaterial(new Material(Shader.Find("Standard")));
+        // Recalculate normals, set meshFilter/renderer etc...
+        meshData.RefreshMesh();
     }
 }

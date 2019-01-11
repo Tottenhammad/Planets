@@ -21,15 +21,22 @@ public class QuadTreePlanet : MonoBehaviour
     public NoiseSettings noiseSettings;
 
 
-
+    GameObject player;
     public string Name = "Planet: ";
 
     public Place fireSplit;
 
+    
+    public Gradient grad;
+    [HideInInspector]
+    public Texture2D color;
+
+    bool done = false;
     private void Start()
     {
         Create();
         StartCoroutine(loop());
+        player = GameObject.FindGameObjectWithTag("Player");
     }
 
     IEnumerator loop()
@@ -95,8 +102,19 @@ public class QuadTreePlanet : MonoBehaviour
 
     private void Update()
     {
+
         foreach (Segment s in segments)
             s.CheckLod();
+// Debug.Log("Distance: " + Vector3.Distance(player.transform.position, transform.position) + " / " + preLoadDistance);
+        if(Vector3.Distance(player.transform.position, transform.position) <= preLoadDistance && done == false && Vector3.Distance(player.transform.position, transform.position) >= distanceToSplit)
+        {
+            foreach (Segment s in segments)
+            {
+                Camera.main.GetComponent<SplitController>().NextLoop.Add(s);
+            }
+            done = true;
+        }
+       
     }
 
 
@@ -108,5 +126,16 @@ public class QuadTreePlanet : MonoBehaviour
             yield return new WaitForSeconds(0.1f);
             s.CheckLod();
         }
+    }
+    string json;
+    private void FixedUpdate()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+            segments[0].Delete(true);
+    }
+    private void OnValidate()
+    {
+        foreach (Segment s in segments)
+            s.ResetSegment();
     }
 }

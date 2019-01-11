@@ -26,13 +26,17 @@ public class MeshData {
 
     Transform meshOwner;
     Filter noiseFilter;
-    public MeshData(int resolution, MeshRenderer meshRenderer, MeshCollider meshCol, MeshFilter meshFilter,  Vector3 upDir, Transform owner, NoiseSettings nS)
+
+    public string meshId = "";
+    public MeshData(int resolution, MeshRenderer meshRenderer, MeshCollider meshCol, MeshFilter meshFilter,  Vector3 upDir, Transform owner, NoiseSettings nS, string meshId = "")
     {
         this.resolution = resolution;
         this.meshRenderer = meshRenderer;
         this.meshCol = meshCol;
         this.meshFilter = meshFilter;
         this.meshOwner = owner;
+        this.meshId = meshId;
+
         mesh = new Mesh();
         vertices = new Vector3[resolution * resolution];
         triangles = new int[(resolution - 1) * (resolution - 1) * 6];
@@ -42,7 +46,6 @@ public class MeshData {
         noiseFilter = new Filter(nS);
 
     }
-
     public void AddTriangle(int a, int b, int c)
     {
         triangles[triangleI] = a;
@@ -122,4 +125,36 @@ public class MeshData {
             vertices[i] = baseVerts[i] * (1+elevation);
         }
     }
+
+    public void SaveMesh()
+    {
+        MeshSave mS = new MeshSave(vertices, baseVerts, triangles);
+        string meshSaveJson = JsonUtility.ToJson(mS);
+        this.vertices = null;
+        this.baseVerts = null;
+        this.triangles = null;
+        //LoadMesh(meshSaveJson);
+    }
+    public void LoadMesh(string json)
+    {
+        MeshSave mS = JsonUtility.FromJson<MeshSave>(json);
+        this.vertices = mS.vertices;
+        this.baseVerts = mS.baseVerts;
+        this.triangles = mS.triangles;
+    }
 }
+
+public class MeshSave
+{
+    public Vector3[] vertices;
+    public Vector3[] baseVerts;
+    public int[] triangles;
+
+    public MeshSave(Vector3[] vertices, Vector3[] baseVerts, int[] triangles)
+    {
+        this.vertices = vertices;
+        this.baseVerts = baseVerts;
+        this.triangles = triangles;
+    }
+}
+
